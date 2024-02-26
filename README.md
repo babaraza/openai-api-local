@@ -6,7 +6,7 @@ Currently supported API endpoints are:
 - GPT-3.5 Turbo
 - DALL-E 3
 - GPT-4 Vision Preview
-- TTS-1 (text to speech)
+- TTS-1 (text-to-speech)
 
 # Usage
 - Edit the `script.js` file 
@@ -15,3 +15,7 @@ Currently supported API endpoints are:
 # Features
 - Allows the user to monitor daily cost for API usage
 - Supports dark mode
+
+# Planned features
+- Add support for `speech-to-text`
+- Allow more api parameters to be configured for each `endpoint`
