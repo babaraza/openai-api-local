@@ -1,67 +1,73 @@
-    pre {
-        border-radius: 0.375rem;
-      }
+#title {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3vh;
+}
 
-      .copyBtn {
-        cursor: pointer;
-      }
+pre {
+  border-radius: 0.375rem;
+}
 
-      #darkmode {
-        position: absolute;
-        top: 20px;
-        right: 30px;
-      }
+.copyBtn {
+  cursor: pointer;
+}
 
-      .header_div {
-        display: flex;
-        padding: 10px;
-        justify-content: space-between;
-        font-size: 0.75rem;
-        background-color: #373b46;
-        color: #cdcdcd;
-      }
+#darkmode {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+}
 
-      #usage {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 10px;
-        opacity: 0.5;
-      }
+.header_div {
+  display: flex;
+  padding: 10px;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  background-color: #373b46;
+  color: #cdcdcd;
+}
 
-      img[alt="Generated Image"] {
-        width: 50%;
-      }
+#usage {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  font-size: 10px;
+  opacity: 0.5;
+}
 
-      .app {
-        margin-top: 20vh;
-      }
+img[alt="Generated Image"] {
+  width: 50%;
+}
 
-      .loading {
-        display: flex;
-        gap: 1%;
-        align-items: center;
-      }
+.app {
+  margin-top: 12vh;
+}
 
-      #info {
-        display: none;
-        font-size: 12px;
-        margin-top: 20px;
-      }
+.loading {
+  display: flex;
+  gap: 1%;
+  align-items: center;
+}
 
-      code {
-        white-space: pre-wrap;
-      }
+#info {
+  display: none;
+  font-size: 12px;
+  margin-top: 20px;
+}
 
-      .output_area {
-        display: none;
-        min-height: 100px;
-      }
+code {
+  white-space: pre-wrap;
+}
 
-      .vision_options,
-      .dalle_options,
-      .tts_options,
-      .loading_main,
-      #player {
-        display: none;
-      }
+.output_area {
+  display: none;
+  min-height: 100px;
+}
+
+.vision_options,
+.dalle_options,
+.tts_options,
+.loading_main,
+#player {
+  display: none;
+}
