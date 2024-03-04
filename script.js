@@ -133,7 +133,7 @@ async function api_call(options, endpoint, chosen_model) {
       const result = await response.json();
       display_result(result, chosen_model);
       console.log(
-        "%c Result -",
+        "%c API Response at",
         "font-weight:bold",
         new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         result
@@ -151,15 +151,14 @@ async function api_call(options, endpoint, chosen_model) {
 
 // styles the <code> block with a header containing language name and copy button
 function add_header_to_code_block() {
-  if ($("code").length) {
-    const lang = $("code").attr("class").split(" ")[0].split("-")[1];
-    // console.log(lang);
-    let header_div = `<div class="header_div"><div>${lang}</div><div class="copyBtn" onclick="copyCode()">copy</div></div>`;
-    $(header_div).prependTo("pre");
-  } else {
-    // debug log
-    console.log("response doesnt include <code> tags");
-  }
+  $("code").each(function () {
+    // Check if the element has a class and the class starts with "language-"
+    if ($(this).attr("class") && $(this).attr("class").startsWith("language-")) {
+      const lang = $(this).attr("class").split(" ")[0].split("-")[1];
+      let header_div = `<div class="header_div"><div>${lang}</div><div class="copyBtn" onclick="copyCode()">copy</div></div>`;
+      $(header_div).prependTo($(this).parent("pre"));
+    }
+  });
 }
 
 // helper function to display the result depending on the model chosen
