@@ -33,7 +33,7 @@ Currently supported API endpoints are:
 - TTS-1 (text-to-speech)
 
 ## Planned features
-- [ x ] Add support for Gemini by Google 
+- [x] Add support for Gemini by Google 
 - [ ] Better error handling
 - [ ] Add chat feature
 - [ ] Add support for streaming
