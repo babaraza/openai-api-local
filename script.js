@@ -297,29 +297,33 @@ function copyCode() {
 
 // users usage data (tokens and cost) for openai api for given api key for the day
 async function get_usage() {
-  try {
-    const formattedDate = new Date().toISOString().slice(0, 10);
-    // get usage data for todays date
-    const response = await fetch(`https://api.openai.com/v1/usage?date=${formattedDate}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-    });
-    if (!response.ok) throw new Error("Failed to fetch usage data, make sure API key is set");
-    const result = await response.json();
-    // debug log
-    console.log(
-      "%c Usage checked at",
-      "font-weight:bold",
-      new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      result
-    );
-    showUsage(calculateTotalUsage(result));
-  } catch (error) {
-    console.error("An error occurred:", error);
-    alert("An error occurred. Please check the console for details.");
+  if (OPENAI_API_KEY === "") {
+    console.log("ERROR: Cannot get OpenAI usage, API key is not set");
+  } else {
+    try {
+      const formattedDate = new Date().toISOString().slice(0, 10);
+      // get usage data for todays date
+      const response = await fetch(`https://api.openai.com/v1/usage?date=${formattedDate}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch usage data, make sure API key is set");
+      const result = await response.json();
+      // debug log
+      console.log(
+        "%c Usage checked at",
+        "font-weight:bold",
+        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+        result
+      );
+      showUsage(calculateTotalUsage(result));
+    } catch (error) {
+      console.error("An error occurred:", error);
+      alert("An error occurred. Please check the console for details.");
+    }
   }
 }
 
