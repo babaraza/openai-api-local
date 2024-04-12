@@ -4,6 +4,10 @@
   margin-bottom: 3vh;
 }
 
+.result {
+  font-weight: bold;
+}
+
 pre {
   border-radius: 0.375rem;
 }

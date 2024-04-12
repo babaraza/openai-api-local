@@ -1,49 +1,37 @@
 // ENTER YOUR API KEY
-const API_KEY = "";
+const OPENAI_API_KEY = "";
+const CLAUDE_API_KEY = "";
+const GEMINI_API_KEY = "";
 
-const output = document.getElementById("output");
-document.getElementById("models").addEventListener("change", show_options);
+$("#models").on("change", show_options);
 
 // Toggle form fields depending on model selected
 function show_options(event) {
   const value = event.target.value;
   if (value === "gpt-4-turbo-preview" || value === "gpt-3.5-turbo-0125") {
-    showGPTOptions();
+    $("#dalle_options, #info, #vision_options, #tts_options, #player").hide();
+    $("#output").show();
+    $("#prompt").attr("required", "");
   } else if (value === "dall-e-3") {
-    showDalleOptions();
+    $("#dalle_options, #info, #output").show();
+    $("#vision_options, #tts_options, #player").hide();
+    $("#uploaded_image").removeAttr("required");
+    $("#prompt").attr("required", "");
   } else if (value === "tts-1") {
-    showTTSOptions();
+    $("#player, #tts_options").show();
+    $("#dalle_options, #info, #vision_options, #output").hide();
+    $("#uploaded_image").removeAttr("required");
+    $("#prompt").attr("required", "");
   } else if (value === "gpt-4-vision-preview") {
-    showVisionOptions();
+    $("#vision_options, #output").show();
+    $("#dalle_options, #info, #tts_options, #player").hide();
+    $("#prompt").val("What’s in this image?");
+    $("#uploaded_image").attr("required", "");
+  } else if (value === "claude" || value === "gemini") {
+    $("#dalle_options, #info, #vision_options, #tts_options, #player").hide();
+    $("#output").show();
+    $("#prompt").attr("required", "");
   }
-}
-
-// Toggle form fields depending on model selected
-function showGPTOptions() {
-  $("#dalle_options, #info, #vision_options, #tts_options, #player").hide();
-  $("#output").show();
-  $("#prompt").attr("required", "");
-}
-
-function showTTSOptions() {
-  $("#player, #tts_options").show();
-  $("#dalle_options, #info, #vision_options, #output").hide();
-  $("#uploaded_image").removeAttr("required");
-  $("#prompt").attr("required", "");
-}
-
-function showVisionOptions() {
-  $("#vision_options, #output").show();
-  $("#dalle_options, #info, #tts_options, #player").hide();
-  $("#prompt").removeAttr("required");
-  $("#uploaded_image").attr("required", "");
-}
-
-function showDalleOptions() {
-  $("#dalle_options, #info, #output").show();
-  $("#vision_options, #tts_options, #player").hide();
-  $("#prompt").attr("required", "");
-  $("#uploaded_image").removeAttr("required");
 }
 
 // Form Submit Function that prepares api call with model specific data and calls API
@@ -54,10 +42,12 @@ function runAI(event) {
   let chosen_model = $("#models").val();
   let data = {};
   let endpoint = "";
+  let api = "";
 
   // GPT4
   if (chosen_model == "gpt-4-turbo-preview" || chosen_model == "gpt-3.5-turbo-0125") {
     endpoint = "chat/completions";
+    api = "openai";
     data = {
       model: chosen_model,
       messages: [{ role: "user", content: prompt.val() }],
@@ -65,18 +55,22 @@ function runAI(event) {
       // max_tokens: 64,
     };
   }
+
   // TTS
   else if (chosen_model == "tts-1") {
     endpoint = "audio/speech";
+    api = "openai";
     data = {
       model: chosen_model,
       input: prompt.val(),
       voice: $("#tts_voice").val(),
     };
   }
+
   // DALLe-3
   else if (chosen_model == "dall-e-3") {
     endpoint = "images/generations";
+    api = "openai";
     data = {
       model: chosen_model,
       prompt: prompt.val(),
@@ -86,16 +80,18 @@ function runAI(event) {
       size: $("#dalle_resolution").val(),
     };
   }
+
   // VISION
   else if (chosen_model == "gpt-4-vision-preview") {
     endpoint = "chat/completions";
+    api = "openai";
     data = {
       model: chosen_model,
       messages: [
         {
           role: "user",
           content: [
-            { type: "text", text: "What’s in this image?" },
+            { type: "text", text: prompt.val() },
             {
               type: "image_url",
               image_url: {
@@ -110,42 +106,144 @@ function runAI(event) {
     };
   }
 
-  const options = {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${API_KEY}`,
-    },
-    body: JSON.stringify(data),
-  };
-  // console.log(data);
-  // throw new Error("DEBUG");
-  api_call(options, endpoint, chosen_model);
+  // CLAUDE
+  else if (chosen_model == "claude") {
+    api = "claude";
+    data = {
+      model: "claude-3-sonnet-20240229",
+      max_tokens: 1024,
+      messages: [
+        {
+          role: "user",
+          content: prompt.val(),
+        },
+      ],
+    };
+  }
+
+  // GEMINI
+  else if (chosen_model == "gemini") {
+    api = "gemini";
+    data = {
+      contents: [{ parts: [{ text: prompt.val() }] }],
+    };
+  }
+
+  api_call(data, endpoint, chosen_model, api);
   show_loading();
 }
 
 // API Function
-async function api_call(options, endpoint, chosen_model) {
-  try {
-    const response = await fetch(`https://api.openai.com/v1/${endpoint}`, options);
-    // if model is not text-to-speech
-    if (chosen_model != "tts-1") {
+async function api_call(data, endpoint, chosen_model, api) {
+  if (api === "openai") {
+    try {
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body: JSON.stringify(data),
+      };
+
+      const response = await fetch(`https://api.openai.com/v1/${endpoint}`, options);
+      // if model is not text-to-speech
+      if (chosen_model != "tts-1") {
+        const result = await response.json();
+        display_result(result, chosen_model);
+        console.log(
+          "%c API Response at",
+          "font-weight:bold",
+          new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+          result
+        );
+      } else {
+        // text-to-speech endpoint returns audio
+        const result = await response.blob();
+        display_result(result, chosen_model);
+      }
+    } catch (error) {
+      console.error("An error occurred:", error);
+      alert("An error occurred. Please check the console for details.");
+      close_loading();
+    }
+  } else if (api === "claude") {
+    const myHeaders = new Headers();
+    myHeaders.append("x-api-key", CLAUDE_API_KEY);
+    myHeaders.append("anthropic-version", "2023-06-01");
+    myHeaders.append("content-type", "application/json");
+
+    try {
+      const options = {
+        method: "POST",
+        headers: myHeaders,
+        body: JSON.stringify(data),
+        redirect: "follow",
+      };
+      const response = await fetch(`https://api.anthropic.com/v1/messages`, options);
       const result = await response.json();
       display_result(result, chosen_model);
-      console.log(
-        "%c API Response at",
-        "font-weight:bold",
-        new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-        result
-      );
-    } else {
-      // text-to-speech endpoint returns audio
-      const result = await response.blob();
-      display_result(result, chosen_model);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      alert("An error occurred. Please check the console for details.");
+      close_loading();
     }
-  } catch (error) {
-    console.error("An error occurred:", error);
-    alert("An error occurred. Please check the console for details.");
+  } else if (api === "gemini") {
+    try {
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      };
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+        options
+      );
+      const result = await response.json();
+      display_result(result, chosen_model);
+    } catch (error) {
+      console.error("An error occurred:", error);
+      alert("An error occurred. Please check the console for details.");
+      close_loading();
+    }
+  }
+}
+
+// helper function to display the result depending on the model chosen
+function display_result(result, chosen_model) {
+  close_loading();
+  $(".output_area").show();
+  // check which model was used
+  if (
+    chosen_model === "gpt-4-turbo-preview" ||
+    chosen_model === "gpt-3.5-turbo-0125" ||
+    chosen_model === "gpt-4-vision-preview"
+  ) {
+    $("#output").html(marked.parse(result.choices[0].message.content));
+    // colorize <code> block
+    hljs.highlightAll();
+    // style <code> block
+    add_header_to_code_block();
+  } else if (chosen_model === "dall-e-3") {
+    // show generated image
+    $("#output").html(marked.parse(`![Generated Image](${result.data[0].url})`));
+    $("#info").html(
+      `<a href="${result.data[0].url}">Full Size Image</a><br><br><b>Revised Prompt:</b><br>${result.data[0].revised_prompt}`
+    );
+  } else if (chosen_model === "tts-1") {
+    var url = URL.createObjectURL(result);
+    // show audio player
+    $("#player").attr("src", url);
+  } else if (chosen_model === "claude") {
+    $("#output").html(marked.parse(result));
+    hljs.highlightAll();
+    add_header_to_code_block();
+  } else if (chosen_model === "gemini") {
+    $("#output").html(marked.parse(result.candidates[0].content.parts[0].text));
+    hljs.highlightAll();
+    add_header_to_code_block();
   }
 }
 
@@ -159,34 +257,6 @@ function add_header_to_code_block() {
       $(header_div).prependTo($(this).parent("pre"));
     }
   });
-}
-
-// helper function to display the result depending on the model chosen
-function display_result(result, chosen_model) {
-  close_loading();
-  $(".output_area").show();
-  // check which model was used
-  if (
-    chosen_model === "gpt-4-turbo-preview" ||
-    chosen_model === "gpt-3.5-turbo-0125" ||
-    chosen_model === "gpt-4-vision-preview"
-  ) {
-    output.innerHTML = marked.parse(result.choices[0].message.content);
-    // colorize <code> block
-    hljs.highlightAll();
-    // style <code> block
-    add_header_to_code_block();
-  } else if (chosen_model === "dall-e-3") {
-    // show generated image
-    output.innerHTML = marked.parse(`![Generated Image](${result.data[0].url})`);
-    $("#info").html(
-      `<a href="${result.data[0].url}">Full Size Image</a><br><br><b>Revised Prompt:</b><br>${result.data[0].revised_prompt}`
-    );
-  } else if (chosen_model === "tts-1") {
-    var url = URL.createObjectURL(result);
-    // show audio player
-    $("#player").attr("src", url);
-  }
 }
 
 // show loading animation
@@ -213,7 +283,7 @@ function previewImage(event) {
 }
 
 // toggle dark mode
-document.getElementById("btnSwitch").addEventListener("click", () => {
+$("#btnSwitch").on("click", () => {
   const currentTheme = document.documentElement.getAttribute("data-bs-theme");
   const newTheme = currentTheme === "dark" ? "light" : "dark";
   document.documentElement.setAttribute("data-bs-theme", newTheme);
@@ -234,7 +304,7 @@ async function get_usage() {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
       },
     });
     if (!response.ok) throw new Error("Failed to fetch usage data, make sure API key is set");
