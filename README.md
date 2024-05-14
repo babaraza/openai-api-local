@@ -26,7 +26,7 @@ Another benefit of using APIs is that the prompts/responses are **not** used to 
 
 ### OpenAI
 Currently supported API endpoints are:
-- GPT-4 Turbo Preview
+- GPT-4 Omni
 - GPT-3.5 Turbo
 - DALL-E 3
 - GPT-4 Vision Preview

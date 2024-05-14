@@ -8,7 +8,7 @@ $("#models").on("change", show_options);
 // Toggle form fields depending on model selected
 function show_options(event) {
   const value = event.target.value;
-  if (value === "gpt-4-turbo-preview" || value === "gpt-3.5-turbo-0125") {
+  if (value === "gpt-4o" || value === "gpt-3.5-turbo-0125") {
     $("#dalle_options, #info, #vision_options, #tts_options, #player").hide();
     $("#output").show();
     $("#prompt").attr("required", "");
@@ -45,7 +45,7 @@ function runAI(event) {
   let api = "";
 
   // GPT4
-  if (chosen_model == "gpt-4-turbo-preview" || chosen_model == "gpt-3.5-turbo-0125") {
+  if (chosen_model == "gpt-4o" || chosen_model == "gpt-3.5-turbo-0125") {
     endpoint = "chat/completions";
     api = "openai";
     data = {
@@ -217,7 +217,7 @@ function display_result(result, chosen_model) {
   $(".output_area").show();
   // check which model was used
   if (
-    chosen_model === "gpt-4-turbo-preview" ||
+    chosen_model === "gpt-4o" ||
     chosen_model === "gpt-3.5-turbo-0125" ||
     chosen_model === "gpt-4-vision-preview"
   ) {
