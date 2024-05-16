@@ -253,7 +253,7 @@ function add_header_to_code_block() {
     // Check if the element has a class and the class starts with "language-"
     if ($(this).attr("class") && $(this).attr("class").startsWith("language-")) {
       const lang = $(this).attr("class").split(" ")[0].split("-")[1];
-      let header_div = `<div class="header_div"><div>${lang}</div><div class="copyBtn" onclick="copyCode()">copy</div></div>`;
+      let header_div = `<div class="header_div"><div>${lang}</div><div class="copyBtn" onclick="copyCode(this)">copy</div></div>`;
       $(header_div).prependTo($(this).parent("pre"));
     }
   });
@@ -290,8 +290,8 @@ $("#btnSwitch").on("click", () => {
 });
 
 // button in <code> block header to allow user to copy code
-function copyCode() {
-  var codeBlock = document.querySelector("code");
+function copyCode(button) {
+  var codeBlock = button.parentElement.nextElementSibling;
   navigator.clipboard.writeText(codeBlock.innerText);
 }
 
@@ -338,9 +338,9 @@ function calculateTotalUsage(data) {
       n_context_tokens_total: 0.01,
       n_generated_tokens_total: 0.03,
     },
-    "gpt-4-0125-preview": {
-      n_context_tokens_total: 0.01,
-      n_generated_tokens_total: 0.03,
+    "gpt-4o": {
+      n_context_tokens_total: 0.05,
+      n_generated_tokens_total: 0.015,
     },
     "dall-e-3": {
       generations: 0.08,
@@ -391,7 +391,7 @@ function calculateTotalUsage(data) {
       let cost = 0;
 
       // update the variables for each model
-      if (modelId === "gpt-4-0125-preview") {
+      if (modelId === "gpt-4o") {
         gpt4.n_context_tokens_total += inputTokens;
         gpt4.n_generated_tokens_total += outputTokens;
         cost =
