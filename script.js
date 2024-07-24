@@ -8,7 +8,7 @@ $("#models").on("change", show_options);
 // Toggle form fields depending on model selected
 function show_options(event) {
   const value = event.target.value;
-  if (value === "gpt-4o" || value === "gpt-3.5-turbo-0125") {
+  if (value === "gpt-4o" || value === "gpt-4o-mini") {
     $("#dalle_options, #info, #vision_options, #tts_options, #player").hide();
     $("#output").show();
     $("#prompt").attr("required", "");
@@ -44,8 +44,8 @@ function runAI(event) {
   let endpoint = "";
   let api = "";
 
-  // GPT4
-  if (chosen_model == "gpt-4o" || chosen_model == "gpt-3.5-turbo-0125") {
+  // GPT4o
+  if (chosen_model == "gpt-4o" || chosen_model == "gpt-4o-mini") {
     endpoint = "chat/completions";
     api = "openai";
     data = {
@@ -218,7 +218,7 @@ function display_result(result, chosen_model) {
   // check which model was used
   if (
     chosen_model === "gpt-4o" ||
-    chosen_model === "gpt-3.5-turbo-0125" ||
+    chosen_model === "gpt-4o-mini" ||
     chosen_model === "gpt-4-vision-preview"
   ) {
     $("#output").html(marked.parse(result.choices[0].message.content));
@@ -330,9 +330,9 @@ async function get_usage() {
 // convert api usage to dollar cost
 function calculateTotalUsage(data) {
   const prices = {
-    "gpt-3.5-turbo-0125": {
-      n_context_tokens_total: 0.0005,
-      n_generated_tokens_total: 0.0015,
+    "gpt-4o-mini": {
+      n_context_tokens_total: 0.00015,
+      n_generated_tokens_total: 0.0006,
     },
     "gpt-4-1106-vision-preview": {
       n_context_tokens_total: 0.01,
@@ -354,11 +354,11 @@ function calculateTotalUsage(data) {
   let totalUsage = 0;
 
   // usage variables for each model
-  let gpt3 = {
+  let gpt_4o_mini = {
     n_context_tokens_total: 0,
     n_generated_tokens_total: 0,
   };
-  let gpt4 = {
+  let gpt4o = {
     n_context_tokens_total: 0,
     n_generated_tokens_total: 0,
   };
@@ -391,12 +391,12 @@ function calculateTotalUsage(data) {
       let cost = 0;
 
       // update the variables for each model
-      if (modelId === "gpt-4o") {
-        gpt4.n_context_tokens_total += inputTokens;
-        gpt4.n_generated_tokens_total += outputTokens;
+      if (modelId.includes("gpt-4o") && !modelId.includes("mini")) {
+        gpt4o.n_context_tokens_total += inputTokens;
+        gpt4o.n_generated_tokens_total += outputTokens;
         cost =
-          (inputTokens * prices[modelId].n_context_tokens_total +
-            outputTokens * prices[modelId].n_generated_tokens_total) /
+          (inputTokens * prices["gpt-4o"].n_context_tokens_total +
+            outputTokens * prices["gpt-4o"].n_generated_tokens_total) /
           1000;
       } else if (modelId === "gpt-4-1106-vision-preview") {
         gpt4Vision.n_context_tokens_total += inputTokens;
@@ -411,12 +411,12 @@ function calculateTotalUsage(data) {
       } else if (modelId === "tts-1") {
         ttsTotals.totalCharacters += characters;
         cost = (characters * prices[modelId].speech) / 1000;
-      } else if (modelId === "gpt-3.5-turbo-0125") {
-        gpt3.n_context_tokens_total += inputTokens;
-        gpt3.n_generated_tokens_total += outputTokens;
+      } else if (modelId.includes("gpt-4o-mini")) {
+        gpt_4o_mini.n_context_tokens_total += inputTokens;
+        gpt_4o_mini.n_generated_tokens_total += outputTokens;
         cost =
-          (inputTokens * prices[modelId].n_context_tokens_total +
-            outputTokens * prices[modelId].n_generated_tokens_total) /
+          (inputTokens * prices["gpt-4o-mini"].n_context_tokens_total +
+            outputTokens * prices["gpt-4o-mini"].n_generated_tokens_total) /
           1000;
       }
       totalUsage += cost;
@@ -424,12 +424,11 @@ function calculateTotalUsage(data) {
   }
 
   // total cost for the day
-  totalUsage = totalUsage.toFixed(2);
-
+  totalUsage = totalUsage.toFixed(4);
   return {
     totalUsage,
-    gpt3,
-    gpt4,
+    gpt_4o_mini,
+    gpt4o,
     gpt4Vision,
     dalleApiTotals,
     ttsTotals,
@@ -439,8 +438,8 @@ function calculateTotalUsage(data) {
 // format the usage data
 function showUsage(usage) {
   document.getElementById("usage").innerHTML = `
-                          GPT 3: Input: ${usage.gpt3.n_context_tokens_total} / Generated: ${usage.gpt3.n_generated_tokens_total}<br>
-                          GPT 4: Input: ${usage.gpt4.n_context_tokens_total} / Generated: ${usage.gpt4.n_generated_tokens_total}<br>
+                          GPT 4o mini: Input: ${usage.gpt_4o_mini.n_context_tokens_total} / Generated: ${usage.gpt_4o_mini.n_generated_tokens_total}<br>
+                          GPT 4o: Input: ${usage.gpt4o.n_context_tokens_total} / Generated: ${usage.gpt4o.n_generated_tokens_total}<br>
                           GPT 4 Vision: Input: ${usage.gpt4Vision.n_context_tokens_total} / Generated: ${usage.gpt4Vision.n_generated_tokens_total}<br>
                           Dalle 3: Total Images: ${usage.dalleApiTotals.totalNumImages}<br>
                           TTS: Total Characters: ${usage.ttsTotals.totalCharacters}<br>
