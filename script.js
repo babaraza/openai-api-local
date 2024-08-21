@@ -22,7 +22,7 @@ function show_options(event) {
     $("#dalle_options, #info, #vision_options, #output").hide();
     $("#uploaded_image").removeAttr("required");
     $("#prompt").attr("required", "");
-  } else if (value === "gpt-4-vision-preview") {
+  } else if (value === "gpt-4-vision") {
     $("#vision_options, #output").show();
     $("#dalle_options, #info, #tts_options, #player").hide();
     $("#prompt").val("What’s in this image?");
@@ -82,11 +82,11 @@ function runAI(event) {
   }
 
   // VISION
-  else if (chosen_model == "gpt-4-vision-preview") {
+  else if (chosen_model == "gpt-4-vision") {
     endpoint = "chat/completions";
     api = "openai";
     data = {
-      model: chosen_model,
+      model: "gpt-4o",
       messages: [
         {
           role: "user",
@@ -219,7 +219,7 @@ function display_result(result, chosen_model) {
   if (
     chosen_model === "gpt-4o" ||
     chosen_model === "gpt-4o-mini" ||
-    chosen_model === "gpt-4-vision-preview"
+    chosen_model === "gpt-4-vision"
   ) {
     $("#output").html(marked.parse(result.choices[0].message.content));
     // colorize <code> block
